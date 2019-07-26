@@ -1,21 +1,31 @@
-WebDirt = function(sampleMapUrl,sampleFolder,latency,readyCallback,maxLateness,audioContext,destination) {
-  if(sampleMapUrl == null) sampleMapUrl = "sampleMap.json";
-  if(sampleFolder == null) sampleFolder = "samples";
-  if(latency == null) latency = 0.4;
+// webdirt samplebank: (sampleMapUrl, sampleFolder, latency, readyCallback, maxLateness, audioContext, destination)
+// external samplebank: (bank, latency, maxLateness, audioContext, destination)
+WebDirt = function WebDirt() {
+  if (arguments[0] != null && typeof arguments[0] === 'object') {
+    // Use external samplebank signature
+    var [bank, latency, maxLateness, audioContext, destination] = arguments;
+    this.sampleBank = bank;
+  } else {
+    // Use webdirt samplebank signature
+    var [sampleMapUrl, sampleFolder, latency, readyCallback, maxLateness, audioContext, destination] = arguments;
+    this.sampleMapUrl = sampleMapUrl || "sampleMap.json";
+    this.sampleFolder = sampleFolder || "samples";
+    this.sampleBank = new SampleBank(this.sampleMapUrl, this.sampleFolder, readyCallback);
+  }
+
+  if (latency == null) latency = 0.4;
   this.latency = latency;
-  if(typeof maxLateness != 'number') {
+  if (typeof maxLateness != 'number') {
     this.maxLateness = 0.005;
   } else this.maxLateness = maxLateness;
-  this.sampleMapUrl = sampleMapUrl;
-  this.sampleFolder = sampleFolder;
-  this.sampleBank = new SampleBank(this.sampleMapUrl,this.sampleFolder,readyCallback);
+  
   this.cutGroups = new Array;
   this.ac = audioContext;
   this.destination = destination;
-  if(this.ac == null) {
+  if (this.ac == null) {
     console.log("WebDirt initialized (without audio context yet)");
   } else {
-    if(this.destination == null) {
+    if (this.destination == null) {
       this.destination = this.ac.destination;
       console.log("WebDirt initialized with provided audio context and audio context destination");
     } else {
